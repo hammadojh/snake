@@ -3,6 +3,8 @@ const ctx = canvas.getContext('2d');
 const startBtn = document.getElementById('startBtn');
 const scoreElement = document.getElementById('score');
 const highScoreElement = document.getElementById('highScore');
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.querySelector('.theme-icon');
 
 // Game constants
 const GRID_SIZE = 20;
@@ -19,6 +21,31 @@ let gameSpeed = 100;
 
 // Initialize high score display
 highScoreElement.textContent = highScore;
+
+// Theme management
+const savedTheme = localStorage.getItem('snakeGameTheme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeIcon(savedTheme);
+
+function updateThemeIcon(theme) {
+    themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('snakeGameTheme', newTheme);
+    updateThemeIcon(newTheme);
+
+    // Redraw canvas with new theme colors
+    if (!gameRunning) {
+        draw();
+    }
+}
+
+themeToggle.addEventListener('click', toggleTheme);
 
 // Initialize game
 function init() {
@@ -52,8 +79,9 @@ function drawCell(x, y, color) {
 }
 
 function draw() {
-    // Clear canvas
-    ctx.fillStyle = '#1a1a1a';
+    // Clear canvas with theme-aware background
+    const canvasBg = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim();
+    ctx.fillStyle = canvasBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw snake
